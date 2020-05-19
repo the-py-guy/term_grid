@@ -1,5 +1,4 @@
 import os, time, uuid
-
 import colored
 from colored import stylize
 
@@ -7,6 +6,7 @@ class matrix_manager:
 
 	def __init__(self):
 		self.matrices = {}
+		self.covered = {}
 
 	def get_start_of(self,name):
 		try:
@@ -21,11 +21,12 @@ class grid:
 		self.grid = {}
 		self.max = None
 		self.name = uuid.uuid4()
+		self.background_color = None
 
 		if size == 'window':
 			rows, columns = os.popen('stty size', 'r').read().split()
-			size = {'x':int(columns), 'y':int(rows)}
-			self.max = {'x':int(columns)-1, 'y':int(rows)-1}
+			size = {'x':int(columns), 'y':int(rows)-1}
+			self.max = {'x':int(columns)-1, 'y':int(rows)-2}
 			
 		else:
 			size = size.split(':')
@@ -40,6 +41,7 @@ class grid:
 				self.grid[y][x] = {'pixel':' '}
 
 	def show(self):
+		os.system('clear')
 		grid = self.grid
 		for y in grid:
 			row = ''
@@ -49,6 +51,7 @@ class grid:
 
 	def plot_point(self,pixel,x,y):
 		try:
+			self.matrix_manager.covered[str(x)+','+str(y)] = {'pixel':self.grid[y][x]['pixel']}
 			self.grid[y][x]['pixel'] = pixel
 		except:
 			pass
@@ -56,7 +59,9 @@ class grid:
 	def unplot_point(self,x,y):
 		try:
 			if type(self.grid[y][x]) == dict:
-				self.grid[y][x] = {'pixel':' '}
+				old = self.matrix_manager.covered[str(x)+','+str(y)]
+				self.grid[y][x]['pixel'] = old['pixel']
+				del self.matrix_manager.covered[str(x)+','+str(y)]
 		except:
 			pass
 
@@ -97,10 +102,20 @@ class grid:
 			self.plot_point(stylize(" ", colored.bg(color)),x,0)
 
 	def background(self,color):
+		self.background_color = color
 		for y in self.grid:
 			for x in self.grid[y]:
 				pixel = self.grid[y][x]
 				pixel['pixel'] = stylize(" ", colored.bg(color))
+
+
+
+
+
+
+
+
+
 
 
 
