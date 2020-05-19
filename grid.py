@@ -93,11 +93,11 @@ class grid:
 
 	def outline(self,color):
 		size = self.max
-		for y in range(0,size['y']):
+		for y in range(0,size['y']+1):
 			self.plot_point(stylize(" ", colored.bg(color)),size['x'],y)
 			self.plot_point(stylize(" ", colored.bg(color)),0,y)
 
-		for x in range(0,size['x']+1):
+		for x in range(0,size['x']):
 			self.plot_point(stylize(" ", colored.bg(color)),x,size['y'])
 			self.plot_point(stylize(" ", colored.bg(color)),x,0)
 
@@ -107,8 +107,6 @@ class grid:
 			for x in self.grid[y]:
 				pixel = self.grid[y][x]
 				pixel['pixel'] = stylize(" ", colored.bg(color))
-
-
 
 
 
