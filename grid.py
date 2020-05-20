@@ -2,22 +2,22 @@ import os, time, uuid
 import colored
 from colored import stylize
 
-class matrix_manager:
+class sub_grid_manager:
 
 	def __init__(self):
-		self.matrices = {}
+		self.sub_grids = {}
 		self.covered = {}
 
 	def get_start_of(self,name):
 		try:
-			return self.matrices[name]
+			return self.sub_grids[name]
 		except:
 			return None
 
 class grid:
 	
 	def __init__(self,size):
-		self.matrix_manager = matrix_manager()
+		self.sub_grid_manager = sub_grid_manager()
 		self.grid = {}
 		self.max = None
 		self.name = uuid.uuid4()
@@ -49,57 +49,56 @@ class grid:
 				row = row + grid[y][x]['pixel']
 			print(row)
 
-	def plot_point(self,pixel,x,y):
+	def change_pixel(self,pixel,x,y):
 		try:
-			self.matrix_manager.covered[str(x)+','+str(y)] = {'pixel':self.grid[y][x]['pixel']}
+			self.sub_grid_manager.covered[str(x)+','+str(y)] = {'pixel':self.grid[y][x]['pixel']}
 			self.grid[y][x]['pixel'] = pixel
 		except:
 			pass
 
-	def unplot_point(self,x,y):
+	def erase_pixel(self,x,y):
 		try:
 			if type(self.grid[y][x]) == dict:
-				old = self.matrix_manager.covered[str(x)+','+str(y)]
+				old = self.sub_grid_manager.covered[str(x)+','+str(y)]
 				self.grid[y][x]['pixel'] = old['pixel']
-				del self.matrix_manager.covered[str(x)+','+str(y)]
+				del self.sub_grid_manager.covered[str(x)+','+str(y)]
 		except:
 			pass
 
-	def plot_matrix(self,start,matrix):
+	def place_sub_grid(self,matrix,start_x,start_y):
 		name = matrix.name
 		grid = matrix.grid
-		start = start.split(',')
 
-		if self.matrix_manager.get_start_of(name) != None:
-			self.unplot_matrix(matrix)
-		self.matrix_manager.matrices[name] = {'x':int(start[0]), 'y':int(start[1])}
+		if self.sub_grid_manager.get_start_of(name) != None:
+			self.remove_sub_grid(matrix)
+		self.sub_grid_manager.sub_grids[name] = {'x':start_x, 'y':start_y}
 
 		for y in grid:
 			for x in grid[y]:
-				self.plot_point(grid[y][x]['pixel'],x+int(start[0]),y+int(start[1]))
+				self.change_pixel(grid[y][x]['pixel'],x+start_x,y+start_y)
 
-	def unplot_matrix(self,matrix):
+	def remove_sub_grid(self,matrix):
 		name = matrix.name
-		start = self.matrix_manager.get_start_of(name)
+		start = self.sub_grid_manager.get_start_of(name)
 		grid = matrix.grid
 		try:
 			for y in grid:
 				for x in grid[y]:
-					self.unplot_point(x+int(start['x']),y+int(start['y']))
+					self.erase_pixel(x+int(start['x']),y+int(start['y']))
 			
-			del self.matrix_manager.matrices[name]
+			del self.sub_grid_manager.sub_grids[name]
 		except:
 			pass
 
 	def outline(self,color):
 		size = self.max
 		for y in range(0,size['y']+1):
-			self.plot_point(stylize(" ", colored.bg(color)),size['x'],y)
-			self.plot_point(stylize(" ", colored.bg(color)),0,y)
+			self.change_pixel(stylize(" ", colored.bg(color)),size['x'],y)
+			self.change_pixel(stylize(" ", colored.bg(color)),0,y)
 
 		for x in range(0,size['x']):
-			self.plot_point(stylize(" ", colored.bg(color)),x,size['y'])
-			self.plot_point(stylize(" ", colored.bg(color)),x,0)
+			self.change_pixel(stylize(" ", colored.bg(color)),x,size['y'])
+			self.change_pixel(stylize(" ", colored.bg(color)),x,0)
 
 	def background(self,color):
 		self.background_color = color
@@ -107,6 +106,8 @@ class grid:
 			for x in self.grid[y]:
 				pixel = self.grid[y][x]
 				pixel['pixel'] = stylize(" ", colored.bg(color))
+
+
 
 
 
